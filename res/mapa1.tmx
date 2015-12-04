@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="25" height="25" tilewidth="32" tileheight="32" nextobjectid="17">
+ <tileset firstgid="1" name="tileset_space" tilewidth="32" tileheight="32" tilecount="120">
+  <image source="tileset_space.png" width="256" height="480"/>
+ </tileset>
+ <layer name="Fondo" width="25" height="25">
+  <data encoding="base64" compression="zlib">
+   eJzt1FlXDQAUhuFzooiUJjRIMxpkaI5SNI+kgYooSvOsn+85f6Czb1vrXDz37/rW2juZSCSyuMFNssnhFrf5yjdWWGWN7/xgnb/ssMse+xxwyBHj5HKHu+Rxj3wKuM9PfrHBJr/5wxbbHHPCKWecc8E/LvlEIUUUU0IpD3jIo0BnMrBDGeVUUMljqnhCdaAzskMNtdRRTwONPOVZoDOyw3OaaKaFVl7QxstAZ2SHV7zmDe100EkX3YHOyA499NLHW97RzwDvA52RHQYZ4gMfGWaEUcYCnZEdUjcywSRTTDPDLHOBzsgOqRv5zDxfWGCRJZYDnZEd0v2KdJ2RHdL9inSdkR0iP+2qzsgOkZ92VWdkh8hPy/z2zG/P/Pbr/dv/A6kViEY=
+  </data>
+ </layer>
+ <objectgroup name="Planetas">
+  <object id="5" x="569" y="349" width="200" height="200">
+   <ellipse/>
+  </object>
+  <object id="6" x="320" y="48" width="150" height="150">
+   <ellipse/>
+  </object>
+  <object id="7" x="70" y="40" width="100" height="100">
+   <ellipse/>
+  </object>
+  <object id="15" x="47" y="507" width="250" height="250">
+   <ellipse/>
+  </object>
+ </objectgroup>
+ <objectgroup name="Pelota">
+  <object id="12" x="166" y="124" width="10" height="10">
+   <ellipse/>
+  </object>
+ </objectgroup>
+</map>

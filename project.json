@@ -14,6 +14,7 @@
     "src/resource.js",
     "src/app.js",
     "src/gameScene.js",
-    "src/controls.js"
+    "src/controls.js",
+    "src/planeta.js"
   ]
 }

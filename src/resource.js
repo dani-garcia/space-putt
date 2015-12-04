@@ -1,8 +1,10 @@
 "use strict";
 
 var res = {
-    HelloWorld_png: "res/HelloWorld.png",
-    CloseNormal_png: "res/CloseNormal.png"
+    animacion_bola_plist: "res/animacion_bola.plist",
+    animacion_bola_png: "res/animacion_bola.png",
+    mapa1_tmx: "res/mapa1.tmx",
+    planets_plist: "res/planets.plist",
 };
 
 var g_resources = [];
