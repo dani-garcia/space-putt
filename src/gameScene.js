@@ -67,28 +67,36 @@ var GameLayer = cc.Layer.extend({
             this.setPositionY(cc.winSize.height / 2 - yPelota);
         }
 
-        this.spritePelota.body.applyForce(this.calcularFuerza(), cp.vzero);
+        // Friccion rotacional (Reducimos velocidad angular)
+		// https://chipmunk-physics.net/forum/viewtopic.php?t=536
+        this.spritePelota.body.w *= 0.95;
+
+        // Calcular fuerza sobre la pelota
+        this.aplicarGravedadPlanetaria();
     },
 
-    calcularFuerza: function () {
-        var fuerza = cp.v(0, 0);
-        var posPelota = this.spritePelota.getPosition();
+    aplicarGravedadPlanetaria: function () {
+        // Posicion pelota
+        var posPelota = new cc.math.Vec2(this.spritePelota.getPosition());
+		
+		// Inspirado por:
+		// http://www.emanueleferonato.com/2012/03/28/simulate-radial-gravity-also-know-as-planet-gravity-with-box2d-as-seen-on-angry-birds-space/
 
-        //      G M m
-        // F = --------
-        //       d^2
+        for (var i = 0; i < this.planetas.length; i++) {
+            // Planeta y su posicion
+            var planeta = this.planetas[i];
+            var posPlaneta = new cc.math.Vec2(planeta.position);
+            var diametroPlaneta = planeta.diameter;
 
-        /*for (var i = 0; i < this.planetas.length; i++) {
-         var planeta = this.planetas[i];
-         var planetWeight = planeta.diameter / 100;
+            var distancia = new cc.math.Vec2(0, 0);
+            distancia.add(posPlaneta).subtract(posPelota);
 
-         var distXSq = Math.pow(planeta.position.x - posPelota.x, 2);
-         var distYSq = Math.pow(planeta.position.y - posPelota.y, 2);
+            var fuerza = new cc.math.Vec2(distancia);
+            fuerza.scale(1300 / distancia.lengthSq());
+            fuerza.scale(1 / 2 * (diametroPlaneta + this.spritePelota.width ) / distancia.length());
 
-         fuerza.add(cp.v(planetWeight / distXSq, planetWeight / distYSq));
-         }*/
-
-        return fuerza;
+            this.spritePelota.body.applyImpulse(fuerza, cp.vzero);
+        }
     },
 
     procesarMouseDown: function (event) {
@@ -145,7 +153,6 @@ var GameLayer = cc.Layer.extend({
     },
 
     inicializarPelota: function (x, y) {
-        var size = cc.winSize;
         this.spritePelota = new cc.PhysicsSprite("#animacion_bola1.png");
         var body = new cp.Body(1, cp.momentForCircle(1, 0, this.spritePelota.width / 2, cp.vzero));
         body.p = cc.p(x, y);
@@ -153,7 +160,7 @@ var GameLayer = cc.Layer.extend({
         this.space.addBody(body);
 
         var shape = new cp.CircleShape(body, this.spritePelota.width / 2, cp.vzero);
-        shape.setFriction(1);
+        shape.setFriction(10);
         shape.setCollisionType(tipoPelota);
         this.space.addShape(shape);
         this.addChild(this.spritePelota, 20);
