@@ -1,30 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="25" height="25" tilewidth="32" tileheight="32" nextobjectid="17">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="40" height="30" tilewidth="32" tileheight="32" nextobjectid="19">
  <tileset firstgid="1" name="tileset_space" tilewidth="32" tileheight="32" tilecount="120">
   <image source="tileset_space.png" width="256" height="480"/>
  </tileset>
- <layer name="Fondo" width="25" height="25">
+ <layer name="Fondo" width="40" height="30">
   <data encoding="base64" compression="zlib">
-   eJzt1FlXDQAUhuFzooiUJjRIMxpkaI5SNI+kgYooSvOsn+85f6Czb1vrXDz37/rW2juZSCSyuMFNssnhFrf5yjdWWGWN7/xgnb/ssMse+xxwyBHj5HKHu+Rxj3wKuM9PfrHBJr/5wxbbHHPCKWecc8E/LvlEIUUUU0IpD3jIo0BnMrBDGeVUUMljqnhCdaAzskMNtdRRTwONPOVZoDOyw3OaaKaFVl7QxstAZ2SHV7zmDe100EkX3YHOyA499NLHW97RzwDvA52RHQYZ4gMfGWaEUcYCnZEdUjcywSRTTDPDLHOBzsgOqRv5zDxfWGCRJZYDnZEd0v2KdJ2RHdL9inSdkR0iP+2qzsgOkZ92VWdkh8hPy/z2zG/P/Pbr/dv/A6kViEY=
+   eJzt1jOThUEQheG7tm3btm3btvnz9510g+6umvQLnugEPXWCng4LhULhiEAkohCNGMRiD/s4wCGOcIwTnOIO93jAI57wjBe8Yg5hygwpj0M8EpCIJCQjBak4wzkucIkrXOMGt3jDOz7wiS984we/WDPMkPI0pCMDmchCNnKQa+hH62bPMEPK85CPAhSiCMUoQamhH0v/2gwpL0M5KlCJKlSjBrWGfiz9azOkvA71aEAjmtCMFrQa+rH0r82Q8ja0owOd6EI3etBr6MfSvzZDyvvQjwEMYgjDGMGooR9L/9oMKR/DOCYwiSlMYwazhn4s/WszpNztz3ksYBFLWMYKVg39WPrXZki525/r2MAmtrCNHewa+rH0r82Qcu3/0vqx9K/NkHLt/9L6sfSvzZByy/8u9WPpX5sh5Zb/XerH0r82Q8ot/3twXwX3VXBfBfdVcF8F99X/XHu/y332v8t97ivt/S732f8u97mvtPe73Gf/u9znvtLe73Kf/e9yn/tKe7/Lffa/y33uqz9+tAeZ
   </data>
  </layer>
  <objectgroup name="Planetas">
-  <object id="5" x="569" y="349" width="200" height="200">
+  <object id="5" x="800" y="480" width="200" height="200">
    <ellipse/>
   </object>
-  <object id="6" x="320" y="48" width="150" height="150">
+  <object id="6" x="608" y="160" width="150" height="150">
    <ellipse/>
   </object>
-  <object id="7" x="70" y="40" width="100" height="100">
+  <object id="7" x="352" y="256" width="100" height="100">
    <ellipse/>
   </object>
-  <object id="15" x="47" y="507" width="250" height="250">
+  <object id="15" x="320" y="512" width="250" height="250">
    <ellipse/>
   </object>
  </objectgroup>
  <objectgroup name="Pelota">
-  <object id="12" x="166" y="124" width="10" height="10">
+  <object id="12" x="443.273" y="335.636" width="10" height="10">
    <ellipse/>
+  </object>
+ </objectgroup>
+ <objectgroup name="Bordes">
+  <object id="17" x="0" y="0">
+   <polyline points="0,0 1280,0 1280,960 0,960 0,0"/>
   </object>
  </objectgroup>
 </map>
