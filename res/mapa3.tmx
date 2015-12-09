@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="40" height="30" tilewidth="32" tileheight="32" nextobjectid="24">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="40" height="30" tilewidth="32" tileheight="32" nextobjectid="27">
  <tileset firstgid="1" name="tileset_space" tilewidth="32" tileheight="32" tilecount="120">
   <image source="tileset_space.png" width="256" height="480"/>
  </tileset>
@@ -9,21 +9,24 @@
   </data>
  </layer>
  <objectgroup name="Planetas">
-  <object id="5" x="901.333" y="564" width="200" height="200">
+  <object id="5" x="935.997" y="708" width="100" height="100">
    <ellipse/>
   </object>
-  <object id="6" x="685.333" y="285.333" width="150" height="150">
+  <object id="6" x="577.667" y="18.9996" width="400" height="400">
    <ellipse/>
   </object>
-  <object id="7" x="270.667" y="128" width="100" height="100">
+  <object id="15" x="119.333" y="84" width="200" height="200">
    <ellipse/>
   </object>
-  <object id="15" x="193.333" y="373.333" width="250" height="250">
+  <object id="24" x="196.668" y="527.333" width="150" height="150">
+   <ellipse/>
+  </object>
+  <object id="26" x="509.667" y="533.667" width="250" height="250">
    <ellipse/>
   </object>
  </objectgroup>
  <objectgroup name="Pelota">
-  <object id="12" x="361.939" y="207.636" width="10" height="10">
+  <object id="12" x="88.606" y="183.303" width="10" height="10">
    <ellipse/>
   </object>
  </objectgroup>
@@ -33,6 +36,6 @@
   </object>
  </objectgroup>
  <objectgroup name="Meta">
-  <object id="19" x="936.667" y="558.333" width="10" height="25" rotation="-30"/>
+  <object id="19" x="1041.55" y="737.273" width="10" height="25" rotation="80"/>
  </objectgroup>
 </map>
