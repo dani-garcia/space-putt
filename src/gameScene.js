@@ -8,11 +8,12 @@ var tipoMeta = 4;
 var nivelJuego = 1;
 var PELOTAS_JUGADOR_INICIAL = 3;
 
+var DEBUG = false;
+
 var GameLayer = cc.Layer.extend({
     space: null,
 
     mapa: null,
-    mapaAncho: null,
     planetas: null,
     spritePelota: null,
 
@@ -21,6 +22,7 @@ var GameLayer = cc.Layer.extend({
 
     drawNode: null,
     trazaPelota: null,
+    puntosInvalidados: null,
 
     disparada: null,
     tiempoParada: null,
@@ -37,8 +39,10 @@ var GameLayer = cc.Layer.extend({
         this.space.gravity = cp.v(0, 0);
 
         // Depuración
-        this.depuracion = new cc.PhysicsDebugNode(this.space);
-        this.addChild(this.depuracion, 10);
+        if (DEBUG) {
+            var depuracion = new cc.PhysicsDebugNode(this.space);
+            this.addChild(depuracion, 10);
+        }
 
         // Ajustamos el numero de pelotas
         this.pelotas = PELOTAS_JUGADOR_INICIAL;
@@ -48,7 +52,7 @@ var GameLayer = cc.Layer.extend({
         // Nodo de dibujo de traza
         this.drawNode = new cc.DrawNode();
         this.addChild(this.drawNode, 20);
-        this.trazaPelota = [];
+        this.puntosInvalidados = false;
 
         this.scheduleUpdate();
 
@@ -116,18 +120,19 @@ var GameLayer = cc.Layer.extend({
         this.trazaPelota = [];
 
         var dt = 1 / 60; // Para 60 fps
+        var numPuntos = 20;
+        var stepsEntrePuntos = 10;
 
         {
             // Movemos la pelota
             var vector = this.clickToVector(clickVector);
             this.spritePelota.body.applyImpulse(vector, cp.vzero);
 
-            // Dibujamos 10 puntos
-            for (var i = 0; i < 10; i++) {
+            // Anotamos el camino
+            for (var i = 0; i < numPuntos; i++) {
                 this.trazaPelota.push(cc.p(this.spritePelota.body.p));
 
-                // Dejamos 20 pasos entre cada punto
-                for (var j = 0; j < 20; j++) {
+                for (var j = 0; j < stepsEntrePuntos; j++) {
                     this.space.step(dt);
                     this.aplicarGravedadPlanetaria();
                 }
@@ -137,6 +142,8 @@ var GameLayer = cc.Layer.extend({
             this.eliminarPelota();
             this.inicializarPelota(posInicial.x, posInicial.y);
         }
+
+        this.puntosInvalidados = true;
     },
 
     update: function (dt) {
@@ -157,7 +164,9 @@ var GameLayer = cc.Layer.extend({
                 // Tambien borramos la traza
                 if (this.tiempoParada > 2) {
                     this.disparada = false;
+
                     this.trazaPelota = [];
+                    this.puntosInvalidados = true;
 
                     if (this.pelotas <= 0) {
                         console.log("Perdiste");
@@ -172,11 +181,23 @@ var GameLayer = cc.Layer.extend({
         // Calcular fuerza sobre la pelota
         this.aplicarGravedadPlanetaria();
 
-        // Dibujar traza (si la hay)
-        this.drawNode.clear();
-        for (var i in this.trazaPelota) {
-            var punto = this.trazaPelota[i];
-            this.drawNode.drawDot(punto, 3, cc.color.RED);
+        // Dibujar traza (solo si es necesario)
+        if (this.puntosInvalidados) {
+            this.puntosInvalidados = false;
+
+            // Borramos los puntos anteriores
+            this.drawNode.clear();
+
+            var length = this.trazaPelota.length;
+            var initialSize = 3;
+            // Vamos a ir reduciendo el tamaño y opacidad de la traza a medida que nos alejamos del inicio
+            var dSize = initialSize / length;
+            var dColor = 200 / length;
+
+            for (var i = 0; i < length; i++) {
+                var punto = this.trazaPelota[i];
+                this.drawNode.drawDot(punto, initialSize - dSize * i, cc.color(255, 0, 0, 255 - dColor * i));
+            }
         }
     },
 
@@ -251,13 +272,9 @@ var GameLayer = cc.Layer.extend({
     },
 
     cargarMapa: function () {
+        // Crear el mapa y añadirlo al layer
         this.mapa = new cc.TMXTiledMap(res["mapa" + nivelJuego + "_tmx"]);
-
-        // Añadirlo a la Layer
         this.addChild(this.mapa);
-
-        // Ancho del mapa
-        this.mapaAncho = this.mapa.getContentSize().width;
 
         // Pelota
         var pelota = this.mapa.getObjectGroup("Pelota").getObjects();
@@ -316,7 +333,7 @@ var GameLayer = cc.Layer.extend({
         // Nunca genera colisiones reales
         this.shape.setSensor(true);
 
-        // agregar forma dinamica
+        // agregar forma
         this.space.addShape(this.shape);
     },
 
@@ -327,12 +344,14 @@ var GameLayer = cc.Layer.extend({
         this.spritePelota.setBody(body);
         this.space.addBody(body);
 
+        // Forma
         var shape = new cp.CircleShape(body, this.spritePelota.width / 2, cp.vzero);
         shape.setFriction(100);
         shape.setCollisionType(tipoPelota);
         this.space.addShape(shape);
         this.addChild(this.spritePelota, 20);
 
+        // Metodo para poder eliminar la pelota luego
         this.eliminarPelota = function () {
             this.space.removeShape(shape);
             this.space.removeBody(shape.body);

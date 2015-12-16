@@ -27,7 +27,6 @@ var Planeta = cc.Class.extend({
         this.sprite.setBody(body);
         layer.addChild(this.sprite, 5);
 
-
         // forma
         this.shape = new cp.CircleShape(body, this.diameter / 2, cp.vzero);
         this.shape.setCollisionType(tipoPlaneta);
@@ -35,13 +34,5 @@ var Planeta = cc.Class.extend({
 
         // agregar forma dinamica
         this.space.addShape(this.shape);
-    },
-
-    eliminar: function () {
-        // quita la forma
-        this.space.removeShape(this.shape);
-
-        // quita el sprite
-        this.layer.removeChild(this.sprite);
     }
 });

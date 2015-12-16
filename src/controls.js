@@ -1,7 +1,6 @@
 "use strict";
 
 var ControlesLayer = cc.Layer.extend({
-    spriteBotonSaltar: null,
     etiquetaPelotas: null,
     etiquetaNivel: null,
 
@@ -32,12 +31,7 @@ var ControlesLayer = cc.Layer.extend({
             onMouseScroll: null
         }, this);
 
-        this.scheduleUpdate();
         return true;
-    },
-
-    update: function (dt) {
-
     },
 
     mouseDown: function () {

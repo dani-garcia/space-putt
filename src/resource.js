@@ -13,7 +13,11 @@ var res = {
     planets_png: "res/planets.png",
 
     meta_plist: "res/meta.plist",
-    meta_png: "res/meta.png"
+    meta_png: "res/meta.png",
+
+    fondo_titulo_png: "res/fondo_titulo.png",
+    jugar_png: "res/jugar.png",
+    jugar_glow_png: "res/jugar_glow.png"
 };
 
 var g_resources = [];
