@@ -31,7 +31,7 @@ var Planeta = cc.Class.extend({
         // forma
         this.shape = new cp.CircleShape(body, this.diameter / 2, cp.vzero);
         this.shape.setCollisionType(tipoPlaneta);
-        this.shape.setFriction(1);
+        this.shape.setFriction(100);
 
         // agregar forma dinamica
         this.space.addShape(this.shape);

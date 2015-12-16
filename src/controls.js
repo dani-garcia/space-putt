@@ -5,6 +5,8 @@ var ControlesLayer = cc.Layer.extend({
     etiquetaPelotas: null,
     etiquetaNivel: null,
 
+    click: null,
+
     ctor: function () {
         this._super();
         var size = cc.winSize;
@@ -24,7 +26,10 @@ var ControlesLayer = cc.Layer.extend({
         // Registrar Mouse Down
         cc.eventManager.addListener({
             event: cc.EventListener.MOUSE,
-            onMouseDown: this.procesarMouseDown.bind(this)
+            onMouseDown: this.mouseDown.bind(this),
+            onMouseUp: this.mouseUp.bind(this),
+            onMouseMove: this.mouseMove.bind(this),
+            onMouseScroll: null
         }, this);
 
         this.scheduleUpdate();
@@ -35,23 +40,22 @@ var ControlesLayer = cc.Layer.extend({
 
     },
 
-    procesarMouseDown: function (event) {
-        // Accedemos al padre (Scene), pedimos la capa con la idCapaJuego
+    mouseDown: function () {
+        this.click = true;
+    },
+
+    mouseMove: function (event) {
+        if (this.click) {
+            var gameLayer = this.getParent().getChildByTag(idCapaJuego);
+            gameLayer.trazarPelota(event.getLocation());
+        }
+    },
+
+    mouseUp: function (event) {
+        this.click = false;
+
         var gameLayer = this.getParent().getChildByTag(idCapaJuego);
-
-        // tenemos el objeto GameLayer
-        var body = gameLayer.spritePelota.body;
-        var dx = (event.getLocationX() - body.p.x) - gameLayer.getPositionX();
-        var dy = (event.getLocationY() - body.p.y) - gameLayer.getPositionY();
-
-        var movimiento = new cc.math.Vec2(dx, dy);
-
-        if (movimiento.length() > 500)
-            movimiento.normalize().scale(500);
-
-        console.log(movimiento);
-
-        gameLayer.moverPelota(movimiento);
+        gameLayer.moverPelota(event.getLocation());
     },
 
     actualizarNivel: function () {

@@ -19,6 +19,12 @@ var GameLayer = cc.Layer.extend({
     meta: null,
     pelotas: null,
 
+    drawNode: null,
+    trazaPelota: null,
+
+    disparada: null,
+    tiempoParada: null,
+
     ctor: function () {
         this._super();
 
@@ -38,6 +44,12 @@ var GameLayer = cc.Layer.extend({
         this.pelotas = PELOTAS_JUGADOR_INICIAL;
 
         this.cargarMapa();
+
+        // Nodo de dibujo de traza
+        this.drawNode = new cc.DrawNode();
+        this.addChild(this.drawNode, 20);
+        this.trazaPelota = [];
+
         this.scheduleUpdate();
 
         this.space.addCollisionHandler(tipoPelota, tipoMeta, null, this.collisionPelotaConMeta.bind(this), null, null);
@@ -46,12 +58,20 @@ var GameLayer = cc.Layer.extend({
     },
 
     collisionPelotaConMeta: function (arbiter, space) {
+        // Si no se ha disparado, es que estamos trazando el camino
+        if (!this.disparada)
+            return;
+
         console.log("Ganaste");
 
         // Cambiamos de nivel. Como solo hay tres, los repetimos
         nivelJuego %= 3;
         nivelJuego++;
 
+        this.cambioNivel();
+    },
+
+    cambioNivel: function () {
         // Cambiamos el contador de nivel
         var capaControles = this.getParent().getChildByTag(idCapaControles);
         capaControles.actualizarNivel();
@@ -63,49 +83,101 @@ var GameLayer = cc.Layer.extend({
         cc.director.runScene(new GameScene());
     },
 
-    moverPelota: function (vector) {
-        // TODO No permitir moverse hasta que la pelota esté parada durante 3 segundos
-        // TODO Cuando se quede sin pelotas, pierde
+    clickToVector: function (clickVector) {
+        var maxVector = 700;
+        var vector = new cc.math.Vec2(clickVector).subtract(this.spritePelota.body.p).subtract(this.getPosition());
+
+        if (vector.length() > maxVector)
+            vector.normalize().scale(maxVector);
+
+        return vector;
+    },
+
+    moverPelota: function (clickVector) {
+        // Si se ha disparado o no quedan pelotas, no se puede hacer de nuevo
+        if (this.disparada || this.pelotas <= 0)
+            return;
+
+        var vector = this.clickToVector(clickVector);
 
         var capaControles = this.getParent().getChildByTag(idCapaControles);
         capaControles.setPelotas(--this.pelotas);
 
+        this.disparada = true;
         this.spritePelota.body.applyImpulse(vector, cp.vzero);
+    },
+
+    trazarPelota: function (clickVector) {
+        // Si se ha disparado, no se puede hacer de nuevo
+        if (this.disparada)
+            return;
+
+        var posInicial = cc.p(this.spritePelota.body.p);
+        this.trazaPelota = [];
+
+        var dt = 1 / 60; // Para 60 fps
+
+        {
+            // Movemos la pelota
+            var vector = this.clickToVector(clickVector);
+            this.spritePelota.body.applyImpulse(vector, cp.vzero);
+
+            // Dibujamos 10 puntos
+            for (var i = 0; i < 10; i++) {
+                this.trazaPelota.push(cc.p(this.spritePelota.body.p));
+
+                // Dejamos 20 pasos entre cada punto
+                for (var j = 0; j < 20; j++) {
+                    this.space.step(dt);
+                    this.aplicarGravedadPlanetaria();
+                }
+            }
+
+            // Reseteamos la pelota
+            this.eliminarPelota();
+            this.inicializarPelota(posInicial.x, posInicial.y);
+        }
     },
 
     update: function (dt) {
         this.space.step(dt);
 
-        // actualizar camara (posición de la capa).
-        var xPelota = this.spritePelota.getBody().p.x;
-        var yPelota = this.spritePelota.getBody().p.y;
+        this.actualizarCamara();
 
-        if (cc.winSize.width / 2 > xPelota) {
-            this.setPositionX(0);
+        // Actualizar tiempo de disparo
+        if (this.disparada) {
+            var velocidad = new cc.math.Vec2(this.spritePelota.body.getVel()).length();
 
-        } else if (this.mapa.width - cc.winSize.width / 2 < xPelota) {
-            this.setPositionX(cc.winSize.width - this.mapa.width);
+            if (velocidad > 20) {
+                this.tiempoParada = 0
+            } else {
+                this.tiempoParada += dt;
 
-        } else {
-            this.setPositionX(cc.winSize.width / 2 - xPelota);
+                // Si llevamos parados dos segundos, podemos volver a tirar si quedan pelotas, o perdemos si no quedan
+                // Tambien borramos la traza
+                if (this.tiempoParada > 2) {
+                    this.disparada = false;
+                    this.trazaPelota = [];
+
+                    if (this.pelotas <= 0) {
+                        console.log("Perdiste");
+
+                        nivelJuego = 1;
+                        this.cambioNivel();
+                    }
+                }
+            }
         }
-
-        if (cc.winSize.height / 2 > yPelota) {
-            this.setPositionY(0);
-
-        } else if (this.mapa.height - cc.winSize.height / 2 < yPelota) {
-            this.setPositionY(cc.winSize.height - this.mapa.height);
-
-        } else {
-            this.setPositionY(cc.winSize.height / 2 - yPelota);
-        }
-
-        // Friccion rotacional (Reducimos velocidad angular)
-        // https://chipmunk-physics.net/forum/viewtopic.php?t=536
-        this.spritePelota.body.w *= 0.95;
 
         // Calcular fuerza sobre la pelota
         this.aplicarGravedadPlanetaria();
+
+        // Dibujar traza (si la hay)
+        this.drawNode.clear();
+        for (var i in this.trazaPelota) {
+            var punto = this.trazaPelota[i];
+            this.drawNode.drawDot(punto, 3, cc.color.RED);
+        }
     },
 
     aplicarGravedadPlanetaria: function () {
@@ -127,21 +199,55 @@ var GameLayer = cc.Layer.extend({
             var distancia = new cc.math.Vec2(planeta.position).subtract(posPelota);
             var distanciaLength = distancia.length();
 
-            // No deberia pasar, si esta dentro del planeta
-            if (distanciaLength < diametroPlaneta / 2 - diametroPelota) {
-                debugger;
-            }
-
             // Calculo de impulso
             var impulso = new cc.math.Vec2(distancia).normalize();
             impulso.scale(700 / distanciaLength);
             impulso.scale((diametroPlaneta + diametroPelota) / distanciaLength);
+
+            // Si está en la superficie de un planeta, fingimos que los demas planetas no le afectan
+            // Si no hacemos esto la pelota rodara en la direccion del planeta mas cercano
+            if (distanciaLength < diametroPlaneta / 2 + diametroPelota) {
+                sumaImpulso = impulso;
+                break;
+            }
 
             sumaImpulso.add(impulso);
         }
 
         // Aplicamos el impulso
         this.spritePelota.body.applyImpulse(sumaImpulso, cp.vzero);
+
+        // Friccion rotacional (Reducimos velocidad angular)
+        // Si no la esfera estaria rodando sin parar
+        // https://chipmunk-physics.net/forum/viewtopic.php?t=536
+        this.spritePelota.body.w *= 0.95;
+    },
+
+    actualizarCamara: function () {
+        var xPelota = this.spritePelota.getBody().p.x;
+        var yPelota = this.spritePelota.getBody().p.y;
+
+        // Actualizar eje X
+        if (cc.winSize.width / 2 > xPelota) {
+            this.setPositionX(0);
+
+        } else if (this.mapa.width - cc.winSize.width / 2 < xPelota) {
+            this.setPositionX(cc.winSize.width - this.mapa.width);
+
+        } else {
+            this.setPositionX(cc.winSize.width / 2 - xPelota);
+        }
+
+        // Actualizar eje Y
+        if (cc.winSize.height / 2 > yPelota) {
+            this.setPositionY(0);
+
+        } else if (this.mapa.height - cc.winSize.height / 2 < yPelota) {
+            this.setPositionY(cc.winSize.height - this.mapa.height);
+
+        } else {
+            this.setPositionY(cc.winSize.height / 2 - yPelota);
+        }
     },
 
     cargarMapa: function () {
@@ -222,7 +328,7 @@ var GameLayer = cc.Layer.extend({
         this.space.addBody(body);
 
         var shape = new cp.CircleShape(body, this.spritePelota.width / 2, cp.vzero);
-        shape.setFriction(10);
+        shape.setFriction(100);
         shape.setCollisionType(tipoPelota);
         this.space.addShape(shape);
         this.addChild(this.spritePelota, 20);
