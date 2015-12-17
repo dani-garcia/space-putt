@@ -4,11 +4,12 @@ var tipoPelota = 1;
 var tipoPlaneta = 2;
 var tipoBorde = 3;
 var tipoMeta = 4;
+var tipoSol = 5;
 
 var nivelJuego = 1;
 var PELOTAS_JUGADOR_INICIAL = 3;
 
-var DEBUG = false;
+var DEBUG = !false;
 
 var GameLayer = cc.Layer.extend({
     space: null,
@@ -22,21 +23,31 @@ var GameLayer = cc.Layer.extend({
 
     drawNode: null,
     trazaPelota: null,
+    finalizarTraza: null,
     puntosInvalidados: null,
+
+    // Configuracion de la traza
+    numPuntos: 25,
+    stepsEntrePuntos: 10,
 
     disparada: null,
     tiempoParada: null,
 
+    posicionUltimoDisparo: null,
+
+    debeEliminarPelota: null,
+
     ctor: function () {
         this._super();
 
+        // Carga de las animaciones
         cc.spriteFrameCache.addSpriteFrames(res.animacion_bola_plist);
         cc.spriteFrameCache.addSpriteFrames(res.meta_plist);
         cc.spriteFrameCache.addSpriteFrames(res.planets_plist);
+        cc.spriteFrameCache.addSpriteFrames(res.sun_plist);
 
         // Inicializar Space
         this.space = new cp.Space();
-        this.space.gravity = cp.v(0, 0);
 
         // Depuración
         if (DEBUG) {
@@ -44,21 +55,41 @@ var GameLayer = cc.Layer.extend({
             this.addChild(depuracion, 10);
         }
 
-        // Ajustamos el numero de pelotas
-        this.pelotas = PELOTAS_JUGADOR_INICIAL;
-
-        this.cargarMapa();
-
         // Nodo de dibujo de traza
         this.drawNode = new cc.DrawNode();
         this.addChild(this.drawNode, 20);
-        this.puntosInvalidados = false;
+        this.trazaPelota = [];
+
+        // Ajustamos el numero de pelotas
+        this.pelotas = PELOTAS_JUGADOR_INICIAL;
+
+        // Cargamos el mapa
+        this.cargarMapa();
+
+        // Colisiones con la meta
+        this.space.addCollisionHandler(tipoPelota, tipoMeta, null, null, this.collisionPelotaConMeta.bind(this), null);
+
+        // Colisiones con el sol
+        this.space.addCollisionHandler(tipoPelota, tipoSol, null, null, this.collisionPelotaConSol.bind(this), null);
 
         this.scheduleUpdate();
 
-        this.space.addCollisionHandler(tipoPelota, tipoMeta, null, this.collisionPelotaConMeta.bind(this), null, null);
-
         return true;
+    },
+
+    collisionPelotaConSol: function (arbiter, space) {
+        // Si no se ha disparado, es que estamos trazando el camino
+        if (!this.disparada) {
+
+            // Si estamos trazando el camino, detenemos la traza
+            this.finalizarTraza = true;
+            return;
+        }
+
+        console.log("Colision contra el sol");
+
+        // Reseteamos la pelota
+        this.debeEliminarPelota = true;
     },
 
     collisionPelotaConMeta: function (arbiter, space) {
@@ -68,7 +99,7 @@ var GameLayer = cc.Layer.extend({
 
         console.log("Ganaste");
 
-        // Cambiamos de nivel. Como solo hay tres, los repetimos
+        // Cambiamos de nivel. Como solo hay tres, los repetimos en bucle
         nivelJuego %= 3;
         nivelJuego++;
 
@@ -88,8 +119,14 @@ var GameLayer = cc.Layer.extend({
     },
 
     clickToVector: function (clickVector) {
-        var maxVector = 700;
+        // Calculamos el vector de movimiento (posClick - (posPelota + scrollPantalla))
         var vector = new cc.math.Vec2(clickVector).subtract(this.spritePelota.body.p).subtract(this.getPosition());
+
+        // Lo multiplicamos por 1.5
+        vector.scale(1.5);
+
+        // Evitamos que pase de un valor maximo
+        var maxVector = 500;
 
         if (vector.length() > maxVector)
             vector.normalize().scale(maxVector);
@@ -102,13 +139,19 @@ var GameLayer = cc.Layer.extend({
         if (this.disparada || this.pelotas <= 0)
             return;
 
+        // Obtenemos el vector del disparo
         var vector = this.clickToVector(clickVector);
 
+        // Quitamos una pelota
         var capaControles = this.getParent().getChildByTag(idCapaControles);
         capaControles.setPelotas(--this.pelotas);
 
+        // Disparamos
         this.disparada = true;
         this.spritePelota.body.applyImpulse(vector, cp.vzero);
+
+        // Guardamos la posicion para restaurarla en caso de que se lance contra el sol
+        this.posicionUltimoDisparo = cc.p(this.spritePelota.body.p);
     },
 
     trazarPelota: function (clickVector) {
@@ -116,42 +159,53 @@ var GameLayer = cc.Layer.extend({
         if (this.disparada)
             return;
 
+        // Guardamos la pos inicial y preparamos la traza
         var posInicial = cc.p(this.spritePelota.body.p);
         this.trazaPelota = [];
+        this.finalizarTraza = false;
 
-        var dt = 1 / 60; // Para 60 fps
-        var numPuntos = 20;
-        var stepsEntrePuntos = 10;
+        // Movemos la pelota
+        var vector = this.clickToVector(clickVector);
+        this.spritePelota.body.applyImpulse(vector, cp.vzero);
 
-        {
-            // Movemos la pelota
-            var vector = this.clickToVector(clickVector);
-            this.spritePelota.body.applyImpulse(vector, cp.vzero);
-
-            // Anotamos el camino
-            for (var i = 0; i < numPuntos; i++) {
-                this.trazaPelota.push(cc.p(this.spritePelota.body.p));
-
-                for (var j = 0; j < stepsEntrePuntos; j++) {
-                    this.space.step(dt);
-                    this.aplicarGravedadPlanetaria();
-                }
+        // Anotamos el camino
+        for (var i = 0; i < this.numPuntos; i++) {
+            // Iteramos las fisicas unas cuantas veces
+            for (var j = 0; j < this.stepsEntrePuntos; j++) {
+                this.space.step(1 / 60); // Para 60 fps
+                this.aplicarGravedadPlanetaria();
             }
 
-            // Reseteamos la pelota
-            this.eliminarPelota();
-            this.inicializarPelota(posInicial.x, posInicial.y);
+            // Si nos toca finalizar la traza, acabamos antes de tiempo
+            if (this.finalizarTraza)
+                break;
+
+            // Anotamos la posicion
+            this.trazaPelota.push(cc.p(this.spritePelota.body.p));
         }
 
-        this.puntosInvalidados = true;
+        // Tras acabar la traza, reseteamos la pelota
+        this.eliminarPelota();
+        this.inicializarPelota(posInicial.x, posInicial.y);
     },
 
     update: function (dt) {
+        // Si tenemos que eliminar la pelota (por que choque contra el sol), lo hacemos
+        if (this.debeEliminarPelota) {
+            this.debeEliminarPelota = false;
+            this.eliminarPelota();
+            this.inicializarPelota(this.posicionUltimoDisparo.x, this.posicionUltimoDisparo.y);
+            this.trazaPelota = [];
+            return;
+        }
+
+        // Iteramos las fisicas
         this.space.step(dt);
 
+        // Centramos la camara con respecto a la pelota
         this.actualizarCamara();
 
-        // Actualizar tiempo de disparo
+        // Actualizamos el tiempo de disparo
         if (this.disparada) {
             var velocidad = new cc.math.Vec2(this.spritePelota.body.getVel()).length();
 
@@ -160,7 +214,7 @@ var GameLayer = cc.Layer.extend({
             } else {
                 this.tiempoParada += dt;
 
-                // Si llevamos parados dos segundos, podemos volver a tirar si quedan pelotas, o perdemos si no quedan
+                // Si llevamos parados dos segundos, podemos volver a tirar si quedan pelotas
                 // Tambien borramos la traza
                 if (this.tiempoParada > 2) {
                     this.disparada = false;
@@ -168,14 +222,13 @@ var GameLayer = cc.Layer.extend({
                     this.trazaPelota = [];
                     this.puntosInvalidados = true;
 
-                    if (this.pelotas <= 0) {
-                        console.log("Perdiste");
-
-                        nivelJuego = 1;
-                        this.cambioNivel();
-                    }
                 }
             }
+        } else if (this.pelotas <= 0) { // Si toca disparar, pero no hay pelotas, perdiste
+            console.log("Perdiste");
+
+            nivelJuego = 1;
+            this.cambioNivel();
         }
 
         // Calcular fuerza sobre la pelota
@@ -188,13 +241,12 @@ var GameLayer = cc.Layer.extend({
             // Borramos los puntos anteriores
             this.drawNode.clear();
 
-            var length = this.trazaPelota.length;
             var initialSize = 3;
             // Vamos a ir reduciendo el tamaño y opacidad de la traza a medida que nos alejamos del inicio
-            var dSize = initialSize / length;
-            var dColor = 200 / length;
+            var dSize = initialSize / this.numPuntos;
+            var dColor = 200 / this.numPuntos;
 
-            for (var i = 0; i < length; i++) {
+            for (var i = 0; i < this.trazaPelota.length; i++) {
                 var punto = this.trazaPelota[i];
                 this.drawNode.drawDot(punto, initialSize - dSize * i, cc.color(255, 0, 0, 255 - dColor * i));
             }
@@ -289,6 +341,13 @@ var GameLayer = cc.Layer.extend({
             this.planetas.push(new Planeta(this.space, planetas[i], this));
         }
 
+        // Soles
+        var soles = this.mapa.getObjectGroup("Soles").getObjects();
+
+        for (var i = 0; i < soles.length; i++) {
+            this.planetas.push(new Sol(this.space, soles[i], this));
+        }
+
         // Meta
         var meta = this.mapa.getObjectGroup("Meta").getObjects();
         cc.assert(meta.length === 1, "Sólo debe haber una meta");
@@ -356,7 +415,10 @@ var GameLayer = cc.Layer.extend({
             this.space.removeShape(shape);
             this.space.removeBody(shape.body);
             this.spritePelota.removeFromParent();
-        }
+        };
+
+        this.disparada = false;
+        this.puntosInvalidados = true;
     }
 });
 

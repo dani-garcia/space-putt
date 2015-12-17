@@ -38,4 +38,5 @@
  <objectgroup name="Meta">
   <object id="19" x="1041.55" y="737.273" width="10" height="25" rotation="80"/>
  </objectgroup>
+ <objectgroup name="Soles"/>
 </map>

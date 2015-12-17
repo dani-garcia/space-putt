@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="40" height="30" tilewidth="32" tileheight="32" nextobjectid="24">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="40" height="30" tilewidth="32" tileheight="32" nextobjectid="25">
  <tileset firstgid="1" name="tileset_space" tilewidth="32" tileheight="32" tilecount="120">
   <image source="tileset_space.png" width="256" height="480"/>
  </tileset>
@@ -18,9 +18,6 @@
   <object id="7" x="270.667" y="128" width="100" height="100">
    <ellipse/>
   </object>
-  <object id="15" x="193.333" y="373.333" width="250" height="250">
-   <ellipse/>
-  </object>
  </objectgroup>
  <objectgroup name="Pelota">
   <object id="12" x="361.939" y="207.636" width="10" height="10">
@@ -34,5 +31,10 @@
  </objectgroup>
  <objectgroup name="Meta">
   <object id="19" x="936.667" y="558.333" width="10" height="25" rotation="-30"/>
+ </objectgroup>
+ <objectgroup name="Soles">
+  <object id="24" x="280" y="496" width="250" height="250">
+   <ellipse/>
+  </object>
  </objectgroup>
 </map>

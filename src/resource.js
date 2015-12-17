@@ -12,6 +12,9 @@ var res = {
     planets_plist: "res/planets.plist",
     planets_png: "res/planets.png",
 
+    sun_plist: "res/sun.plist",
+    sun_png: "res/sun.png",
+
     meta_plist: "res/meta.plist",
     meta_png: "res/meta.png",
 

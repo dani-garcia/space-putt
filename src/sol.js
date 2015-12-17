@@ -1,16 +1,11 @@
 "use strict";
 
-var Planeta = cc.Class.extend({
-    space: null,
-
-    sprite: null,
-    shape: null,
-    layer: null,
-
-    diameter: null,
-    position: null,
+var Sol = Planeta.extend({
 
     ctor: function (space, object, layer) {
+        // Asi llamariamos al constructor de planeta
+        //this._super(space, object, layer);
+
         this.space = space;
         this.layer = layer;
 
@@ -21,16 +16,23 @@ var Planeta = cc.Class.extend({
         body.setPos(this.position);
 
         // Physics Sprite
-        var randomNumber = Math.floor(Math.random() * 2) + 1;
-        var spriteName = "#planet_" + this.diameter + "_" + randomNumber + ".png";
+        var spriteName = "#sun_1.png";
         this.sprite = new cc.PhysicsSprite(spriteName);
         this.sprite.setBody(body);
         layer.addChild(this.sprite, 5);
 
+        // Animacion
+        var frames = [];
+        for (var i = 1; i <= 16; i++) {
+            var str = "sun_" + i + ".png";
+            var frame = cc.spriteFrameCache.getSpriteFrame(str);
+            frames.push(frame);
+        }
+        this.sprite.runAction(cc.animate(new cc.Animation(frames, 0.15)).repeatForever());
+
         // forma
         this.shape = new cp.CircleShape(body, this.diameter / 2, cp.vzero);
-        this.shape.setCollisionType(tipoPlaneta);
-        this.shape.setFriction(100);
+        this.shape.setCollisionType(tipoSol);
 
         // agregar forma
         this.space.addShape(this.shape);

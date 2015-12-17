@@ -9,7 +9,7 @@ var MenuLayer = cc.Layer.extend({
         var spriteFondoTitulo = new cc.Sprite(res.fondo_titulo_png);
         // Asigno posición central
         spriteFondoTitulo.setPosition(cc.p(size.width / 2, size.height / 2));
-        // Lo escalo porque es más pequeño que la pantalla
+        // Lo escalo al tamaño de la pantalla
         spriteFondoTitulo.setScale(size.height / spriteFondoTitulo.height);
         // Añado Sprite a la escena
         this.addChild(spriteFondoTitulo);
