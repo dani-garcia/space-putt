@@ -16,7 +16,7 @@ var Sol = Planeta.extend({
         body.setPos(this.position);
 
         // Physics Sprite
-        var spriteName = "#sun_1.png";
+        var spriteName = "#sun/sun_1.png";
         this.sprite = new cc.PhysicsSprite(spriteName);
         this.sprite.setBody(body);
         layer.addChild(this.sprite, 5);
@@ -24,7 +24,7 @@ var Sol = Planeta.extend({
         // Animacion
         var frames = [];
         for (var i = 1; i <= 16; i++) {
-            var str = "sun_" + i + ".png";
+            var str = "sun/sun_" + i + ".png";
             var frame = cc.spriteFrameCache.getSpriteFrame(str);
             frames.push(frame);
         }
@@ -35,6 +35,6 @@ var Sol = Planeta.extend({
         this.shape.setCollisionType(tipoSol);
 
         // agregar forma
-        this.space.addShape(this.shape);
+        this.space.addStaticShape(this.shape);
     }
 });

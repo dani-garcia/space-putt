@@ -9,7 +9,7 @@ var tipoSol = 5;
 var nivelJuego = 1;
 var PELOTAS_JUGADOR_INICIAL = 3;
 
-var DEBUG = !false;
+var DEBUG = false;
 
 var GameLayer = cc.Layer.extend({
     space: null,
@@ -41,10 +41,7 @@ var GameLayer = cc.Layer.extend({
         this._super();
 
         // Carga de las animaciones
-        cc.spriteFrameCache.addSpriteFrames(res.animacion_bola_plist);
-        cc.spriteFrameCache.addSpriteFrames(res.meta_plist);
-        cc.spriteFrameCache.addSpriteFrames(res.planets_plist);
-        cc.spriteFrameCache.addSpriteFrames(res.sun_plist);
+        cc.spriteFrameCache.addSpriteFrames(res.sprites_plist);
 
         // Inicializar Space
         this.space = new cp.Space();
@@ -397,7 +394,7 @@ var GameLayer = cc.Layer.extend({
     },
 
     inicializarPelota: function (x, y) {
-        this.spritePelota = new cc.PhysicsSprite("#animacion_bola1.png");
+        this.spritePelota = new cc.PhysicsSprite("#bola.png");
         var body = new cp.Body(1, cp.momentForCircle(1, 0, this.spritePelota.width / 2, cp.vzero));
         body.p = cc.p(x, y);
         this.spritePelota.setBody(body);

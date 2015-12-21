@@ -22,7 +22,7 @@ var Planeta = cc.Class.extend({
 
         // Physics Sprite
         var randomNumber = Math.floor(Math.random() * 2) + 1;
-        var spriteName = "#planet_" + this.diameter + "_" + randomNumber + ".png";
+        var spriteName = "#planet/planet_" + this.diameter + "_" + randomNumber + ".png";
         this.sprite = new cc.PhysicsSprite(spriteName);
         this.sprite.setBody(body);
         layer.addChild(this.sprite, 5);
@@ -33,6 +33,6 @@ var Planeta = cc.Class.extend({
         this.shape.setFriction(100);
 
         // agregar forma
-        this.space.addShape(this.shape);
+        this.space.addStaticShape(this.shape);
     }
 });
