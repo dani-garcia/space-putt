@@ -64,10 +64,10 @@ var GameLayer = cc.Layer.extend({
         this.cargarMapa();
 
         // Colisiones con la meta
-        this.space.addCollisionHandler(tipoPelota, tipoMeta, null, null, this.collisionPelotaConMeta.bind(this), null);
+        this.space.addCollisionHandler(tipoPelota, tipoMeta, null, this.collisionPelotaConMeta.bind(this), null, null);
 
         // Colisiones con el sol
-        this.space.addCollisionHandler(tipoPelota, tipoSol, null, null, this.collisionPelotaConSol.bind(this), null);
+        this.space.addCollisionHandler(tipoPelota, tipoSol, null, this.collisionPelotaConSol.bind(this), null, null);
 
         this.scheduleUpdate();
 
@@ -390,7 +390,7 @@ var GameLayer = cc.Layer.extend({
         this.shape.setSensor(true);
 
         // agregar forma
-        this.space.addShape(this.shape);
+        this.space.addStaticShape(this.shape);
     },
 
     inicializarPelota: function (x, y) {
