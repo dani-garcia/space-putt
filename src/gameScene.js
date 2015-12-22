@@ -5,6 +5,7 @@ var tipoPlaneta = 2;
 var tipoBorde = 3;
 var tipoMeta = 4;
 var tipoSol = 5;
+var tipoAgujero = 6;
 
 var nivelJuego = 1;
 var PELOTAS_JUGADOR_INICIAL = 3;
@@ -16,6 +17,7 @@ var GameLayer = cc.Layer.extend({
 
     mapa: null,
     planetas: null,
+    agujeros: null,
     spritePelota: null,
 
     meta: null,
@@ -27,13 +29,14 @@ var GameLayer = cc.Layer.extend({
     puntosInvalidados: null,
 
     // Configuracion de la traza
-    numPuntos: 25,
-    stepsEntrePuntos: 10,
+    numPuntos: 35,
+    stepsEntrePuntos: 7,
 
     disparada: null,
     tiempoParada: null,
 
     posicionUltimoDisparo: null,
+    ultimoAgujero: null,
 
     debeEliminarPelota: null,
 
@@ -69,9 +72,70 @@ var GameLayer = cc.Layer.extend({
         // Colisiones con el sol
         this.space.addCollisionHandler(tipoPelota, tipoSol, null, this.collisionPelotaConSol.bind(this), null, null);
 
+        // Colisiones con agujeros negros
+        this.space.addCollisionHandler(tipoPelota, tipoAgujero, null, this.collisionPelotaConAgujero.bind(this), null, this.separacionPelotaConAgujero.bind(this));
+
         this.scheduleUpdate();
 
         return true;
+    },
+
+    collisionPelotaConAgujero: function (arbiter, space) {
+        if (!this.disparada) {
+            this.finalizarTraza = true;
+            return;
+        }
+
+        var shapeAgujero = arbiter.getShapes()[1];
+        var agujero;
+
+        // Buscamos el agujero actual
+        for (var key in this.agujeros) {
+            agujero = this.agujeros[key];
+            // Si lo hemos encontrado, salimos
+            if (agujero.shape === shapeAgujero)
+                break;
+        }
+
+        // Si acabamos de salir por aqui, no podemos volver a entrar
+        if (this.ultimoAgujero.id === agujero.id) {
+            return;
+        }
+
+        var ladoDestino = agujero.side === "+" ? "-" : "+";
+
+        // Buscamos el agujero destino
+        var agujeroDestino = this.agujeros[agujero.id + ladoDestino];
+
+        // anotamos de donde salimos
+        this.ultimoAgujero = agujeroDestino;
+
+        // Nos movemos a su posicion
+        var action = cc.moveTo(0, agujeroDestino.position);
+        this.spritePelota.runAction(action);
+    },
+
+    separacionPelotaConAgujero: function (arbiter, space) {
+        if (!this.disparada) {
+            this.finalizarTraza = true;
+            return;
+        }
+
+        var shapeAgujero = arbiter.getShapes()[1];
+        var agujero;
+
+        // Buscamos el agujero actual
+        for (var key in this.agujeros) {
+            agujero = this.agujeros[key];
+            // Si lo hemos encontrado, salimos
+            if (agujero.shape === shapeAgujero)
+                break;
+        }
+
+        // Si nos separamos de la salida, ya seria posible volver a usar los agujeros
+        if (this.ultimoAgujero === agujero) {
+            this.ultimoAgujero = {};
+        }
     },
 
     collisionPelotaConSol: function (arbiter, space) {
@@ -119,8 +183,8 @@ var GameLayer = cc.Layer.extend({
         // Calculamos el vector de movimiento (posClick - (posPelota + scrollPantalla))
         var vector = new cc.math.Vec2(clickVector).subtract(this.spritePelota.body.p).subtract(this.getPosition());
 
-        // Lo multiplicamos por 1.5
-        vector.scale(1.5);
+        // Lo multiplicamos por 2
+        vector.scale(2);
 
         // Evitamos que pase de un valor maximo
         var maxVector = 500;
@@ -343,6 +407,16 @@ var GameLayer = cc.Layer.extend({
 
         for (var i = 0; i < soles.length; i++) {
             this.planetas.push(new Sol(this.space, soles[i], this));
+        }
+
+        // Agujeros de gusano
+        var agujeros = this.mapa.getObjectGroup("Agujeros").getObjects();
+        this.ultimoAgujero = {};
+        this.agujeros = {};
+
+        for (var i = 0; i < agujeros.length; i++) {
+            var agu = new AgujeroGusano(this.space, agujeros[i], this);
+            this.agujeros[agu.id + agu.side] = agu;
         }
 
         // Meta

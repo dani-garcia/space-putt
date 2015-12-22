@@ -20,11 +20,11 @@ var Planeta = cc.Class.extend({
         var body = cp.StaticBody();
         body.setPos(this.position);
 
-        // Physics Sprite
+        // Sprite
         var randomNumber = Math.floor(Math.random() * 2) + 1;
         var spriteName = "#planet/planet_" + this.diameter + "_" + randomNumber + ".png";
-        this.sprite = new cc.PhysicsSprite(spriteName);
-        this.sprite.setBody(body);
+        this.sprite = new cc.Sprite(spriteName);
+        this.sprite.setPosition(this.position);
         layer.addChild(this.sprite, 5);
 
         // forma

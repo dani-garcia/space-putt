@@ -39,4 +39,5 @@
   <object id="19" x="1027.33" y="154.333" width="10" height="25" rotation="-30"/>
  </objectgroup>
  <objectgroup name="Soles"/>
+ <objectgroup name="Agujeros"/>
 </map>

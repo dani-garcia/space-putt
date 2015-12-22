@@ -16,6 +16,7 @@
     "src/gameScene.js",
     "src/controls.js",
     "src/planeta.js",
-    "src/sol.js"
+    "src/sol.js",
+    "src/agujero.js"
   ]
 }
