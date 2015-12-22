@@ -1,5 +1,7 @@
 "use strict";
 
+var _animacionSol;
+
 var Sol = Planeta.extend({
 
     ctor: function (space, object, layer) {
@@ -21,14 +23,21 @@ var Sol = Planeta.extend({
         this.sprite.setPosition(this.position);
         layer.addChild(this.sprite, 5);
 
-        // Animacion
-        var frames = [];
-        for (var i = 1; i <= 27; i++) {
-            var str = "sun/sun_" + i + ".png";
-            var frame = cc.spriteFrameCache.getSpriteFrame(str);
-            frames.push(frame);
+        // Cargamos la animacion solo una vez
+        if (!_animacionSol) {
+            // Animacion
+            var frames = [];
+            for (var i = 1; i <= 27; i++) {
+                var str = "sun/sun_" + i + ".png";
+                var frame = cc.spriteFrameCache.getSpriteFrame(str);
+                frames.push(frame);
+            }
+
+            _animacionSol = new cc.Animation(frames, 0.2);
+            console.log("Animacion sol")
         }
-        this.sprite.runAction(cc.animate(new cc.Animation(frames, 0.15)).repeatForever());
+
+        this.sprite.runAction(cc.animate(_animacionSol).repeatForever());
 
         // forma
         this.shape = new cp.CircleShape(body, this.diameter / 2, cp.vzero);
