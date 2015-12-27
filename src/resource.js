@@ -11,7 +11,13 @@ var res = {
 
     fondo_titulo_png: "res/fondo_titulo.png",
     jugar_png: "res/jugar.png",
-    jugar_glow_png: "res/jugar_glow.png"
+    jugar_glow_png: "res/jugar_glow.png",
+
+    golfhit_wav: "res/golfhit.wav",
+    burned_wav: "res/burned.wav",
+    warp_wav: "res/warp.wav",
+    win_wav: "res/win.wav",
+    over_wav: "res/over.wav"
 };
 
 var g_resources = [];

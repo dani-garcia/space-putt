@@ -58,6 +58,12 @@ var ControlesLayer = cc.Layer.extend({
 
     setPelotas: function (pelotas) {
         this.etiquetaVidas.setString("Pelotas: " + pelotas);
+        this.etiquetaVidas.setColor(cc.color.WHITE);
+    },
+
+    setPelotasDesactivadas: function (pelotas) {
+        this.etiquetaVidas.setString("Pelotas: " + pelotas);
+        this.etiquetaVidas.setColor(cc.color.RED);
     }
 });
 

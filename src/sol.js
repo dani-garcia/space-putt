@@ -2,15 +2,14 @@
 
 var _animacionSol;
 
-var Sol = Planeta.extend({
+var Sol = cc.Class.extend({
+    sprite: null,
+    shape: null,
+
+    diameter: null,
+    position: null,
 
     ctor: function (space, object, layer) {
-        // Asi llamariamos al constructor de planeta
-        //this._super(space, object, layer);
-
-        this.space = space;
-        this.layer = layer;
-
         this.diameter = object.width;
         this.position = cp.v(object.x + this.diameter / 2, object.y + this.diameter / 2);
 
@@ -34,16 +33,15 @@ var Sol = Planeta.extend({
             }
 
             _animacionSol = new cc.Animation(frames, 0.2);
-            console.log("Animacion sol")
         }
 
         this.sprite.runAction(cc.animate(_animacionSol).repeatForever());
 
         // forma
         this.shape = new cp.CircleShape(body, this.diameter / 2, cp.vzero);
-        this.shape.setCollisionType(tipoSol);
+        this.shape.setCollisionType(tipo.SOL);
 
         // agregar forma
-        this.space.addStaticShape(this.shape);
+        space.addStaticShape(this.shape);
     }
 });
