@@ -11,6 +11,7 @@ var tipo = {
 
 var nivelJuego = 1;
 
+var NUM_NIVELES = 3;
 var PELOTAS_JUGADOR_INICIAL = 3;
 var DEBUG = false;
 
@@ -155,6 +156,10 @@ var GameLayer = cc.Layer.extend({
         // Reseteamos la pelota y la traza
         this.debeEliminarPelota = true;
         this.trazaPelota = [];
+
+        // Ponemos el contador en blanco
+        var capaControles = this.getParent().getChildByTag(idCapaControles);
+        capaControles.setPelotas(this.pelotas);
     },
 
     collisionPelotaConMeta: function (arbiter, space) {
@@ -165,8 +170,7 @@ var GameLayer = cc.Layer.extend({
 
         cc.audioEngine.playEffect(res.win_wav, false);
 
-        // Cambiamos de nivel. Como solo hay tres, los repetimos en bucle
-        nivelJuego %= 3;
+        // Cambiamos de nivel.
         nivelJuego++;
 
         this.cambioNivel();
@@ -399,8 +403,9 @@ var GameLayer = cc.Layer.extend({
     },
 
     cargarMapa: function () {
-        // Crear el mapa y añadirlo al layer
-        this.mapa = new cc.TMXTiledMap(res["mapa" + nivelJuego + "_tmx"]);
+        // Crear el mapa y añadirlo al layer (como hay un numero limitado de niveles, los repetimos en bucle
+        var nivel = (nivelJuego - 1) % NUM_NIVELES + 1;
+        this.mapa = new cc.TMXTiledMap(res["mapa" + nivel + "_tmx"]);
         this.addChild(this.mapa);
 
         // ----------------
